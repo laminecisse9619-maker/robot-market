@@ -1,0 +1,14 @@
+import type { Seller } from '../types'
+
+export const sellers: Seller[] = [
+  { id: 's1', name: 'RobotTech Store', slug: 'robottech', country: 'United States', countryCode: 'US', logoInitial: 'R', verified: true, rating: 4.8, reviewCount: 312, salesCount: 1204, joinedYear: 2021, description: 'Industrial and home automation robots, built and tested in-house.' },
+  { id: 's2', name: 'Nexora Robotics', slug: 'nexora', country: 'Germany', countryCode: 'DE', logoInitial: 'N', verified: true, rating: 4.9, reviewCount: 201, salesCount: 856, joinedYear: 2020, description: 'Precision engineering for industrial arms and automation lines.' },
+  { id: 's3', name: 'Dakar Automation', slug: 'dakar-automation', country: 'Senegal', countryCode: 'SN', logoInitial: 'D', verified: true, rating: 4.7, reviewCount: 58, salesCount: 143, joinedYear: 2023, description: 'Agricultural and delivery robots adapted for West African markets.' },
+  { id: 's4', name: 'Shenzhen RoboWorks', slug: 'shenzhen-roboworks', country: 'China', countryCode: 'CN', logoInitial: 'S', verified: true, rating: 4.6, reviewCount: 940, salesCount: 5310, joinedYear: 2019, description: 'Large-scale manufacturer of consumer and home robots.' },
+  { id: 's5', name: 'Atlas Humanoids', slug: 'atlas-humanoids', country: 'Japan', countryCode: 'JP', logoInitial: 'A', verified: true, rating: 5.0, reviewCount: 87, salesCount: 132, joinedYear: 2022, description: 'Next-generation humanoid robots for research and education.' },
+  { id: 's6', name: 'Maple Robotics Co.', slug: 'maple-robotics', country: 'Canada', countryCode: 'CA', logoInitial: 'M', verified: false, rating: 4.4, reviewCount: 39, salesCount: 76, joinedYear: 2024, description: 'Boutique seller of educational and hobbyist robots.' },
+  { id: 's7', name: 'Casablanca RoboHub', slug: 'casablanca-robohub', country: 'Morocco', countryCode: 'MA', logoInitial: 'C', verified: true, rating: 4.5, reviewCount: 64, salesCount: 210, joinedYear: 2022, description: 'Distributor of cleaning and security robots across North Africa.' },
+  { id: 's8', name: 'Seoul Dynamics', slug: 'seoul-dynamics', country: 'South Korea', countryCode: 'KR', logoInitial: 'S', verified: true, rating: 4.8, reviewCount: 175, salesCount: 640, joinedYear: 2020, description: 'AI-driven service robots for retail and hospitality.' },
+  { id: 's9', name: 'Gulf Robotics FZE', slug: 'gulf-robotics', country: 'United Arab Emirates', countryCode: 'AE', logoInitial: 'G', verified: true, rating: 4.6, reviewCount: 92, salesCount: 305, joinedYear: 2021, description: 'Security and delivery robots for commercial properties.' },
+  { id: 's10', name: 'Bharat RoboLabs', slug: 'bharat-robolabs', country: 'India', countryCode: 'IN', logoInitial: 'B', verified: false, rating: 4.3, reviewCount: 47, salesCount: 98, joinedYear: 2023, description: 'Affordable educational robotics kits for schools.' },
+]

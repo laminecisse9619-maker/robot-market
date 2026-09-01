@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #0A2320;
+  --color-ink-soft: #4B615F;
+  --color-slate: #5B6B6A;
+  --color-line: #DCE7E5;
+  --color-mist: #F4FAF9;
+  --color-mist-2: #E9F4F2;
+  --color-teal-50: #E6FBF8;
+  --color-teal-100: #C3F3EC;
+  --color-teal-400: #17C9B4;
+  --color-teal-glow: #2FE4CC;
+  --color-teal-500: #0FA895;
+  --color-teal-600: #0B8A7A;
+  --color-teal-700: #096F62;
+  --color-teal-900: #073B37;
+  --color-coral: #FF7A59;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-mist);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+::selection {
+  background-color: var(--color-teal-100);
+  color: var(--color-ink);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-line);
+  background-color: white;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.input:focus {
+  border-color: var(--color-teal-500);
+}
+.input::placeholder {
+  color: var(--color-slate);
+  opacity: 0.6;
+}
