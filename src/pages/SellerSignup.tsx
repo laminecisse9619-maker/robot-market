@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, User, Store, ShieldCheck, PartyPopper } from 'lucide-react'
+import { CheckCircle2, User, Store, ShieldCheck, PartyPopper, AlertCircle } from 'lucide-react'
 import type { SellerApplication } from '../types'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
 const steps = [
   { id: 1, label: 'Account', icon: User },
@@ -24,6 +25,8 @@ const emptyForm: SellerApplication = {
 export default function SellerSignup() {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<SellerApplication>(emptyForm)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const update = (patch: Partial<SellerApplication>) => setForm((f) => ({ ...f, ...patch }))
 
@@ -33,6 +36,32 @@ export default function SellerSignup() {
   const canContinueFromStep1 = form.fullName.trim() && form.email.trim()
   const canContinueFromStep2 = form.country.trim() && form.phone.trim()
   const canContinueFromStep3 = form.storeName.trim()
+
+  const createStore = async () => {
+    if (!isSupabaseConfigured) {
+      // No Supabase project connected yet — fall back to local-only demo flow.
+      next()
+      return
+    }
+    setSubmitting(true)
+    setError(null)
+    const { error: insertError } = await supabase.from('sellers').insert({
+      full_name: form.fullName,
+      business_name: form.businessName || null,
+      country: form.country,
+      email: form.email,
+      phone: form.phone,
+      seller_type: form.sellerType,
+      store_name: form.storeName,
+      store_description: form.storeDescription || null,
+    })
+    setSubmitting(false)
+    if (insertError) {
+      setError(insertError.message)
+      return
+    }
+    next()
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-5 lg:px-8 py-12">
@@ -148,6 +177,18 @@ export default function SellerSignup() {
                 placeholder="Tell buyers what makes your robots stand out."
               />
             </Field>
+            {!isSupabaseConfigured && (
+              <p className="text-xs text-slate rounded-xl bg-mist p-3 flex items-start gap-2">
+                <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                No Supabase project connected yet — this submission will run in local demo mode and won't be saved. Add your credentials to .env to persist real signups.
+              </p>
+            )}
+            {error && (
+              <p className="text-xs text-coral rounded-xl bg-coral/10 p-3 flex items-start gap-2">
+                <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                Couldn't create your store: {error}
+              </p>
+            )}
           </div>
         )}
 
@@ -183,15 +224,16 @@ export default function SellerSignup() {
               Back
             </button>
             <button
-              onClick={next}
+              onClick={step === 3 ? createStore : next}
               disabled={
+                submitting ||
                 (step === 1 && !canContinueFromStep1) ||
                 (step === 2 && !canContinueFromStep2) ||
                 (step === 3 && !canContinueFromStep3)
               }
               className="rounded-full bg-ink px-6 py-2.5 text-sm font-medium text-white hover:bg-teal-950 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {step === 3 ? 'Create store' : 'Continue'}
+              {step === 3 ? (submitting ? 'Creating store...' : 'Create store') : 'Continue'}
             </button>
           </div>
         )}

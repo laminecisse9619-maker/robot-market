@@ -70,3 +70,17 @@ export interface SellerApplication {
   storeName: string
   storeDescription: string
 }
+
+// Shape of a row in the Supabase `sellers` table (snake_case, matches SQL schema).
+export interface SellerRecord {
+  id: string
+  full_name: string
+  business_name: string | null
+  country: string
+  email: string
+  phone: string
+  seller_type: 'individual' | 'manufacturer' | 'distributor' | 'business'
+  store_name: string
+  store_description: string | null
+  created_at: string
+}

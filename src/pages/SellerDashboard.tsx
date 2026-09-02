@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   LayoutDashboard, Package, ShoppingBag, MessageCircle, Star, Wallet, Store,
-  TrendingUp, Plus, MoreVertical,
+  TrendingUp, Plus, MoreVertical, Loader2,
 } from 'lucide-react'
 import { robots } from '../data/robots'
 import { sellers } from '../data/sellers'
 import { formatPrice } from '../utils/format'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import type { SellerRecord } from '../types'
 
 const menu = [
   { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
@@ -34,18 +36,53 @@ const statusColor: Record<string, string> = {
 
 export default function SellerDashboard() {
   const [tab, setTab] = useState('overview')
-  const seller = sellers[0]
-  const myListings = robots.filter((r) => r.sellerId === seller.id)
+  const [liveSeller, setLiveSeller] = useState<SellerRecord | null>(null)
+  const [loading, setLoading] = useState(isSupabaseConfigured)
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+    let cancelled = false
+    ;(async () => {
+      // No auth wired up yet, so this shows the most recently created store —
+      // once accounts exist, filter by the signed-in user's id instead.
+      const { data } = await supabase
+        .from('sellers')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (!cancelled) {
+        setLiveSeller(data)
+        setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const mockSeller = sellers[0]
+  const displayName = liveSeller?.store_name ?? mockSeller.name
+  const initial = displayName.charAt(0).toUpperCase()
+  // Real stores start empty until a products table exists; the mock seller keeps sample listings for demo purposes.
+  const myListings = liveSeller ? [] : robots.filter((r) => r.sellerId === mockSeller.id)
 
   return (
     <div className="mx-auto max-w-7xl px-5 lg:px-8 py-8">
       <div className="flex items-center gap-3 mb-8">
         <span className="flex h-11 w-11 items-center justify-center rounded-full bg-mist font-display font-semibold text-teal-800">
-          {seller.logoInitial}
+          {initial}
         </span>
         <div>
-          <h1 className="font-display text-lg font-semibold text-ink">{seller.name} · Seller Dashboard</h1>
-          <p className="text-xs text-slate">Demo data shown below is illustrative, not live.</p>
+          <h1 className="font-display text-lg font-semibold text-ink">{displayName} · Seller Dashboard</h1>
+          <p className="text-xs text-slate flex items-center gap-1.5">
+            {loading && <Loader2 size={12} className="animate-spin" />}
+            {liveSeller
+              ? 'Live store data loaded from Supabase.'
+              : isSupabaseConfigured
+                ? 'No store found yet in Supabase — showing sample data.'
+                : 'Supabase not connected — showing sample data.'}
+          </p>
         </div>
       </div>
 
@@ -68,7 +105,7 @@ export default function SellerDashboard() {
           {tab === 'overview' && (
             <div className="space-y-6">
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard label="Total sales" value={String(seller.salesCount)} icon={ShoppingBag} />
+                <StatCard label="Total sales" value={String(liveSeller ? 0 : mockSeller.salesCount)} icon={ShoppingBag} />
                 <StatCard label="Revenue (30d)" value={formatPrice(18420, 'USD')} icon={Wallet} trend="+12.4%" />
                 <StatCard label="Active products" value={String(myListings.length)} icon={Package} />
                 <StatCard label="Visitors (30d)" value="3,204" icon={TrendingUp} trend="+6.1%" />
@@ -104,6 +141,13 @@ export default function SellerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
+                    {myListings.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-6 text-center text-sm text-slate">
+                          No products yet — add your first robot to start selling.
+                        </td>
+                      </tr>
+                    )}
                     {myListings.map((r) => (
                       <tr key={r.id} className="border-t border-line">
                         <td className="p-3">
@@ -146,7 +190,9 @@ export default function SellerDashboard() {
           {tab === 'reviews' && (
             <div className="rounded-2xl border border-line p-8 text-center">
               <Star size={28} className="mx-auto text-slate" />
-              <p className="mt-3 text-sm text-slate">{seller.reviewCount} reviews · {seller.rating} average rating</p>
+              <p className="mt-3 text-sm text-slate">
+                {liveSeller ? 'No reviews yet.' : `${mockSeller.reviewCount} reviews · ${mockSeller.rating} average rating`}
+              </p>
             </div>
           )}
 
@@ -158,23 +204,61 @@ export default function SellerDashboard() {
           )}
 
           {tab === 'store' && (
-            <div className="rounded-2xl border border-line p-6 space-y-4 max-w-md">
-              <h2 className="font-display text-sm font-semibold text-ink">Store settings</h2>
-              <label className="block">
-                <span className="block text-sm font-medium text-ink mb-1.5">Store name</span>
-                <input defaultValue={seller.name} className="input" />
-              </label>
-              <label className="block">
-                <span className="block text-sm font-medium text-ink mb-1.5">Description</span>
-                <textarea defaultValue={seller.description} className="input min-h-24 resize-none" />
-              </label>
-              <button className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-white hover:bg-teal-950 transition-colors">
-                Save changes
-              </button>
-            </div>
+            <StoreSettings liveSeller={liveSeller} mockSeller={mockSeller} />
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+function StoreSettings({ liveSeller, mockSeller }: { liveSeller: SellerRecord | null; mockSeller: (typeof sellers)[number] }) {
+  const [name, setName] = useState(liveSeller?.store_name ?? mockSeller.name)
+  const [description, setDescription] = useState(liveSeller?.store_description ?? mockSeller.description)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const save = async () => {
+    if (!liveSeller) {
+      // Demo mode: nothing to persist without a connected Supabase store.
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+      return
+    }
+    setSaving(true)
+    await supabase
+      .from('sellers')
+      .update({ store_name: name, store_description: description })
+      .eq('id', liveSeller.id)
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  return (
+    <div className="rounded-2xl border border-line p-6 space-y-4 max-w-md">
+      <h2 className="font-display text-sm font-semibold text-ink">Store settings</h2>
+      <label className="block">
+        <span className="block text-sm font-medium text-ink mb-1.5">Store name</span>
+        <input value={name} onChange={(e) => setName(e.target.value)} className="input" />
+      </label>
+      <label className="block">
+        <span className="block text-sm font-medium text-ink mb-1.5">Description</span>
+        <textarea value={description ?? ''} onChange={(e) => setDescription(e.target.value)} className="input min-h-24 resize-none" />
+      </label>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-white hover:bg-teal-950 transition-colors disabled:opacity-50"
+        >
+          {saving ? 'Saving...' : 'Save changes'}
+        </button>
+        {saved && <span className="text-xs text-teal-600 font-medium">Saved ✓</span>}
+      </div>
+      {!liveSeller && (
+        <p className="text-xs text-slate">Connect Supabase to persist changes for real.</p>
+      )}
     </div>
   )
 }
