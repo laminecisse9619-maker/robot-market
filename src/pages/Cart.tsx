@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Trash2, ShoppingBag } from 'lucide-react'
 import { useCart } from '../contexts/CartContext'
 import { robots } from '../data/robots'
@@ -7,6 +7,7 @@ import { formatPrice } from '../utils/format'
 
 export default function Cart() {
   const { items, setQuantity, removeItem, totalPrice } = useCart()
+  const navigate = useNavigate()
 
   const lines = items
     .map((item) => ({ item, robot: robots.find((r) => r.id === item.robotId) }))
@@ -102,7 +103,10 @@ export default function Cart() {
             <span>Total</span>
             <span>{formatPrice(totalPrice, 'USD')}</span>
           </div>
-          <button className="mt-6 w-full rounded-full bg-ink px-6 py-3 text-sm font-medium text-white hover:bg-teal-950 transition-colors">
+          <button
+            onClick={() => navigate('/checkout')}
+            className="mt-6 w-full rounded-full bg-ink px-6 py-3 text-sm font-medium text-white hover:bg-teal-950 transition-colors"
+          >
             Proceed to Checkout
           </button>
           <p className="mt-3 text-xs text-slate text-center">

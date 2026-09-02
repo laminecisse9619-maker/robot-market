@@ -6,6 +6,7 @@ import Home from './pages/Home'
 import Robots from './pages/Robots'
 import RobotDetail from './pages/RobotDetail'
 import Cart from './pages/Cart'
+import Checkout from './pages/Checkout'
 import SellerSignup from './pages/SellerSignup'
 import Sellers from './pages/Sellers'
 import SellerStore from './pages/SellerStore'
@@ -23,6 +24,7 @@ function App() {
           <Route path="/robots" element={<Robots />} />
           <Route path="/robots/:slug" element={<RobotDetail />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/sell" element={<SellerSignup />} />
           <Route path="/sellers" element={<Sellers />} />
           <Route path="/sellers/:slug" element={<SellerStore />} />
