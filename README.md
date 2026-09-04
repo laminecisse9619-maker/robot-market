@@ -36,7 +36,25 @@ données d'exemple. Dès que Supabase est connecté :
 - **Seller Dashboard** charge uniquement la boutique du compte connecté (jamais celle d'un autre)
 - L'onglet **Store Settings** du dashboard sauvegarde réellement les modifications
 
-## Pages incluses dans cette version
+## Connecter Stripe (paiement réel)
+
+1. Crée un compte sur **stripe.com** (le mode Test est gratuit et illimité, aucune vraie carte n'est débitée)
+2. Dans **Developers → API keys**, copie la clé **Secret key** (commence par `sk_test_...` en mode test)
+3. Sur Vercel : **Project Settings → Environment Variables** → ajoute `STRIPE_SECRET_KEY` avec cette valeur (⚠️ jamais dans le code ni dans `.env` versionné — cette clé reste côté serveur uniquement)
+4. Redéploie le projet
+
+Une fois connecté :
+- Le bouton "Pay now" à l'étape 3 du checkout redirige vers une vraie page de paiement Stripe
+- Carte de test à utiliser en mode Test : `4242 4242 4242 4242`, n'importe quelle date future, n'importe quel CVC
+- Après paiement, Stripe redirige vers `/checkout/success` qui vérifie le paiement et vide le panier
+- Sans `STRIPE_SECRET_KEY` configurée, le bouton affichera une erreur claire au lieu de simuler un faux paiement
+
+Pour aller plus loin : passer en mode Live (vraies cartes) une fois prêt à recevoir de vrais paiements, et ajouter un webhook Stripe pour enregistrer chaque commande dans Supabase automatiquement.
+
+## Architecture technique du paiement
+Ce projet utilise les **Vercel Functions** (dossier `/api`) pour exécuter du code serveur sans avoir besoin d'un hébergeur séparé — c'est inclus gratuitement dans ton déploiement Vercel actuel :
+- `api/create-checkout-session.ts` — crée la session de paiement Stripe (prix vérifiés côté serveur, jamais fait confiance au navigateur)
+- `api/verify-checkout-session.ts` — vérifie qu'un paiement a bien été effectué avant de vider le panier
 - Accueil (hero, catégories, produits vedettes)
 - Liste des robots avec recherche, filtres et tri
 - Page produit détaillée avec spécifications
@@ -47,10 +65,11 @@ données d'exemple. Dès que Supabase est connecté :
 - Dashboard vendeur (protégé par connexion, données réelles liées au compte)
 - Comparateur de robots (jusqu'à 4 robots, tableau de specs)
 - Messagerie acheteur ↔ vendeur (simulée, réponses automatiques)
-- Panier + parcours de paiement en 4 étapes (adresse, livraison, paiement simulé, confirmation)
+- Panier + parcours de paiement en 3 étapes (adresse, livraison, paiement réel via Stripe Checkout)
 
 ## Ce qui reste à connecter à une vraie base de données
 - Table `robots` réelle pour que les vendeurs ajoutent leurs propres produits
-- Paiement réel (Stripe Connect recommandé — actuellement un formulaire de carte simulé, sans clé API)
-- Table `orders` et `messages` réelles (actuellement en mémoire, perdues au rechargement)
+- Table `orders` réelle (webhook Stripe → Supabase) pour un historique de commandes persistant
+- Table `messages` réelle (actuellement en mémoire, perdue au rechargement)
 - Vérification d'identité/documents vendeur avant publication
+- Reversement automatique aux vendeurs (Stripe Connect) — pour l'instant Stripe encaisse sur ton compte uniquement

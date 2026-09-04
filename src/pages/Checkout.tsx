@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, MapPin, Truck, CreditCard, PartyPopper } from 'lucide-react'
+import { CheckCircle2, MapPin, Truck, CreditCard, AlertCircle } from 'lucide-react'
 import { useCart } from '../contexts/CartContext'
 import { formatPrice } from '../utils/format'
 
@@ -8,7 +8,6 @@ const steps = [
   { id: 1, label: 'Shipping', icon: MapPin },
   { id: 2, label: 'Delivery', icon: Truck },
   { id: 3, label: 'Payment', icon: CreditCard },
-  { id: 4, label: 'Done', icon: PartyPopper },
 ]
 
 interface ShippingForm {
@@ -27,15 +26,15 @@ const deliveryOptions = [
 ]
 
 export default function Checkout() {
-  const { items, totalPrice, clear } = useCart()
+  const { items, totalPrice } = useCart()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [shipping, setShipping] = useState<ShippingForm>(emptyShipping)
   const [delivery, setDelivery] = useState('standard')
-  const [placing, setPlacing] = useState(false)
-  const [orderNumber, setOrderNumber] = useState('')
+  const [redirecting, setRedirecting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  if (items.length === 0 && step < 4) {
+  if (items.length === 0) {
     navigate('/cart')
     return null
   }
@@ -46,15 +45,29 @@ export default function Checkout() {
   const deliveryFee = deliveryOptions.find((d) => d.id === delivery)?.price ?? 0
   const total = totalPrice + deliveryFee
 
-  const placeOrder = () => {
-    setPlacing(true)
-    // Payments are simulated in this prototype — no real API keys or charges involved.
-    setTimeout(() => {
-      setOrderNumber(`ORD-${Math.floor(1000 + Math.random() * 9000)}`)
-      setPlacing(false)
-      setStep(4)
-      clear()
-    }, 1200)
+  const goToPayment = async () => {
+    setRedirecting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((i) => ({ robotId: i.robotId, quantity: i.quantity })),
+          deliveryFee,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || 'Could not start checkout.')
+      }
+      // Cart is intentionally NOT cleared here — only after Stripe confirms
+      // payment on the success page, so a cancelled payment keeps the cart intact.
+      window.location.href = data.url
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      setRedirecting(false)
+    }
   }
 
   return (
@@ -124,20 +137,8 @@ export default function Checkout() {
         {step === 3 && (
           <div className="space-y-5">
             <h2 className="font-display text-lg font-semibold text-ink">Payment</h2>
-            <Field label="Card number">
-              <input className="input" placeholder="4242 4242 4242 4242" inputMode="numeric" />
-            </Field>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Expiry">
-                <input className="input" placeholder="MM/YY" />
-              </Field>
-              <Field label="CVC">
-                <input className="input" placeholder="123" inputMode="numeric" />
-              </Field>
-            </div>
-            <p className="text-xs text-slate rounded-xl bg-mist p-3">
-              This is a simulated payment form — no real card is charged and no payment provider is connected yet.
-              A production version would integrate Stripe, PayPal, or a local mobile-money provider here.
+            <p className="text-sm text-slate">
+              You'll be redirected to Stripe's secure checkout to complete your payment.
             </p>
 
             <div className="pt-2 border-t border-line space-y-1.5">
@@ -145,42 +146,28 @@ export default function Checkout() {
               <Row label="Delivery" value={deliveryFee === 0 ? 'Free' : formatPrice(deliveryFee, 'USD')} />
               <Row label="Total" value={formatPrice(total, 'USD')} bold />
             </div>
+
+            {error && (
+              <p className="text-xs text-coral rounded-xl bg-coral/10 p-3 flex items-start gap-2">
+                <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                {error}
+              </p>
+            )}
           </div>
         )}
 
-        {step === 4 && (
-          <div className="text-center py-6">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-teal-600">
-              <PartyPopper size={26} />
-            </div>
-            <h2 className="mt-4 font-display text-xl font-semibold text-ink">Order confirmed</h2>
-            <p className="mt-2 text-sm text-slate">Order number: <span className="font-medium text-ink">{orderNumber}</span></p>
-            <p className="mt-1 text-sm text-slate max-w-sm mx-auto">
-              A confirmation would normally be emailed to you. Track your order from your account once order history is connected.
-            </p>
-            <button
-              onClick={() => navigate('/robots')}
-              className="mt-6 rounded-full bg-teal-600 px-6 py-3 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
-            >
-              Continue shopping
-            </button>
-          </div>
-        )}
-
-        {step < 4 && (
-          <div className="mt-8 flex items-center justify-between">
-            <button onClick={() => setStep((s) => Math.max(s - 1, 1))} disabled={step === 1} className="text-sm font-medium text-slate disabled:opacity-0">
-              Back
-            </button>
-            <button
-              onClick={() => (step === 3 ? placeOrder() : setStep((s) => s + 1))}
-              disabled={placing || (step === 1 && !canContinueShipping)}
-              className="rounded-full bg-ink px-6 py-2.5 text-sm font-medium text-white hover:bg-teal-950 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {step === 3 ? (placing ? 'Placing order...' : 'Place order') : 'Continue'}
-            </button>
-          </div>
-        )}
+        <div className="mt-8 flex items-center justify-between">
+          <button onClick={() => setStep((s) => Math.max(s - 1, 1))} disabled={step === 1} className="text-sm font-medium text-slate disabled:opacity-0">
+            Back
+          </button>
+          <button
+            onClick={() => (step === 3 ? goToPayment() : setStep((s) => s + 1))}
+            disabled={redirecting || (step === 1 && !canContinueShipping)}
+            className="rounded-full bg-ink px-6 py-2.5 text-sm font-medium text-white hover:bg-teal-950 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {step === 3 ? (redirecting ? 'Redirecting...' : 'Pay now') : 'Continue'}
+          </button>
+        </div>
       </div>
     </div>
   )
