@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle2, User, Store, ShieldCheck, PartyPopper, AlertCircle } from 'lucide-react'
 import type { SellerApplication } from '../types'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 
 const steps = [
   { id: 1, label: 'Account', icon: User },
@@ -23,10 +24,22 @@ const emptyForm: SellerApplication = {
 }
 
 export default function SellerSignup() {
+  const { user } = useAuth()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<SellerApplication>(emptyForm)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Pre-fill from the already-authenticated account — no need to ask again.
+  useEffect(() => {
+    if (user) {
+      setForm((f) => ({
+        ...f,
+        email: user.email ?? f.email,
+        fullName: (user.user_metadata?.full_name as string | undefined) ?? f.fullName,
+      }))
+    }
+  }, [user])
 
   const update = (patch: Partial<SellerApplication>) => setForm((f) => ({ ...f, ...patch }))
 
@@ -43,9 +56,14 @@ export default function SellerSignup() {
       next()
       return
     }
+    if (!user) {
+      setError('You must be logged in to create a store.')
+      return
+    }
     setSubmitting(true)
     setError(null)
     const { error: insertError } = await supabase.from('sellers').insert({
+      user_id: user.id,
       full_name: form.fullName,
       business_name: form.businessName || null,
       country: form.country,

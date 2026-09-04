@@ -74,6 +74,7 @@ export interface SellerApplication {
 // Shape of a row in the Supabase `sellers` table (snake_case, matches SQL schema).
 export interface SellerRecord {
   id: string
+  user_id: string
   full_name: string
   business_name: string | null
   country: string

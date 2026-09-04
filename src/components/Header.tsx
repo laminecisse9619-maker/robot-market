@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Search, Heart, ShoppingCart, Menu, X, Bot } from 'lucide-react'
+import { Search, Heart, ShoppingCart, Menu, X, Bot, User, LogOut } from 'lucide-react'
 import { useCart } from '../contexts/CartContext'
+import { useAuth } from '../contexts/AuthContext'
+import { isSupabaseConfigured } from '../lib/supabase'
 
 const navLinks = [
   { to: '/', label: 'Home' },
@@ -14,7 +16,13 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [query, setQuery] = useState('')
   const { totalItems } = useCart()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/')
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,6 +85,21 @@ export default function Header() {
             >
               Sell Your Robot
             </Link>
+            {isSupabaseConfigured && (
+              user ? (
+                <button
+                  onClick={handleLogout}
+                  aria-label="Log out"
+                  className="p-2 rounded-full text-slate hover:text-ink hover:bg-mist transition-colors"
+                >
+                  <LogOut size={18} />
+                </button>
+              ) : (
+                <Link to="/login" aria-label="Log in" className="p-2 rounded-full text-slate hover:text-ink hover:bg-mist transition-colors">
+                  <User size={19} />
+                </Link>
+              )
+            )}
           </div>
 
           <button
@@ -116,6 +139,23 @@ export default function Header() {
             <Link to="/cart" onClick={() => setMenuOpen(false)} className="px-3 py-2 text-sm font-medium text-slate">
               Cart {totalItems > 0 && `(${totalItems})`}
             </Link>
+            {isSupabaseConfigured && (
+              user ? (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false)
+                    handleLogout()
+                  }}
+                  className="px-3 py-2 text-left text-sm font-medium text-slate"
+                >
+                  Log out
+                </button>
+              ) : (
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="px-3 py-2 text-sm font-medium text-slate">
+                  Log in
+                </Link>
+              )
+            )}
           </nav>
         </div>
       )}

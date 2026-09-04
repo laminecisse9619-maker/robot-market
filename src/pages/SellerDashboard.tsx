@@ -8,6 +8,7 @@ import { robots } from '../data/robots'
 import { sellers } from '../data/sellers'
 import { formatPrice } from '../utils/format'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 import type { SellerRecord } from '../types'
 
 const menu = [
@@ -35,21 +36,22 @@ const statusColor: Record<string, string> = {
 }
 
 export default function SellerDashboard() {
+  const { user } = useAuth()
   const [tab, setTab] = useState('overview')
   const [liveSeller, setLiveSeller] = useState<SellerRecord | null>(null)
   const [loading, setLoading] = useState(isSupabaseConfigured)
 
   useEffect(() => {
-    if (!isSupabaseConfigured) return
+    if (!isSupabaseConfigured || !user) {
+      setLoading(false)
+      return
+    }
     let cancelled = false
     ;(async () => {
-      // No auth wired up yet, so this shows the most recently created store —
-      // once accounts exist, filter by the signed-in user's id instead.
       const { data } = await supabase
         .from('sellers')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
+        .eq('user_id', user.id)
         .maybeSingle()
       if (!cancelled) {
         setLiveSeller(data)
@@ -59,13 +61,14 @@ export default function SellerDashboard() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [user])
 
   const mockSeller = sellers[0]
   const displayName = liveSeller?.store_name ?? mockSeller.name
   const initial = displayName.charAt(0).toUpperCase()
   // Real stores start empty until a products table exists; the mock seller keeps sample listings for demo purposes.
   const myListings = liveSeller ? [] : robots.filter((r) => r.sellerId === mockSeller.id)
+  const hasNoStoreYet = isSupabaseConfigured && user && !loading && !liveSeller
 
   return (
     <div className="mx-auto max-w-7xl px-5 lg:px-8 py-8">
@@ -79,9 +82,11 @@ export default function SellerDashboard() {
             {loading && <Loader2 size={12} className="animate-spin" />}
             {liveSeller
               ? 'Live store data loaded from Supabase.'
-              : isSupabaseConfigured
-                ? 'No store found yet in Supabase — showing sample data.'
-                : 'Supabase not connected — showing sample data.'}
+              : hasNoStoreYet
+                ? "You don't have a store yet — showing sample data."
+                : isSupabaseConfigured
+                  ? 'Showing sample data.'
+                  : 'Supabase not connected — showing sample data.'}
           </p>
         </div>
       </div>

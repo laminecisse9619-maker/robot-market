@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import CompareBar from './components/CompareBar'
+import RequireAuth from './components/RequireAuth'
 import Home from './pages/Home'
 import Robots from './pages/Robots'
 import RobotDetail from './pages/RobotDetail'
@@ -13,6 +14,8 @@ import SellerStore from './pages/SellerStore'
 import SellerDashboard from './pages/SellerDashboard'
 import Compare from './pages/Compare'
 import Messages from './pages/Messages'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
 
 function App() {
   return (
@@ -25,12 +28,14 @@ function App() {
           <Route path="/robots/:slug" element={<RobotDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/sell" element={<SellerSignup />} />
+          <Route path="/sell" element={<RequireAuth><SellerSignup /></RequireAuth>} />
           <Route path="/sellers" element={<Sellers />} />
           <Route path="/sellers/:slug" element={<SellerStore />} />
-          <Route path="/dashboard" element={<SellerDashboard />} />
+          <Route path="/dashboard" element={<RequireAuth><SellerDashboard /></RequireAuth>} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </main>
       <Footer />
