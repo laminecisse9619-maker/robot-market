@@ -4,21 +4,21 @@
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --color-ink: #0A2320;
-  --color-ink-soft: #4B615F;
-  --color-slate: #5B6B6A;
-  --color-line: #DCE7E5;
-  --color-mist: #F4FAF9;
-  --color-mist-2: #E9F4F2;
-  --color-teal-50: #E6FBF8;
-  --color-teal-100: #C3F3EC;
-  --color-teal-400: #17C9B4;
-  --color-teal-glow: #2FE4CC;
-  --color-teal-500: #0FA895;
-  --color-teal-600: #0B8A7A;
-  --color-teal-700: #096F62;
-  --color-teal-900: #073B37;
-  --color-coral: #FF7A59;
+  --color-ink: #170F1C;
+  --color-ink-soft: #6E6478;
+  --color-slate: #6B6470;
+  --color-line: #F0DCE8;
+  --color-mist: #FFF6FB;
+  --color-mist-2: #FDE8F3;
+  --color-teal-50: #FFE3F1;
+  --color-teal-100: #FFBEDD;
+  --color-teal-400: #FF4FA6;
+  --color-teal-glow: #FF7FC4;
+  --color-teal-500: #F0127D;
+  --color-teal-600: #D50E6C;
+  --color-teal-700: #B00B59;
+  --color-teal-900: #55062C;
+  --color-coral: #FF5A4D;
 }
 
 html {
