@@ -68,7 +68,9 @@ export default function RobotDetail() {
             </span>
             <span className="text-slate">{robot.reviewCount} reviews</span>
             <span className="text-slate">·</span>
-            <span className="text-slate">{robot.stock} in stock</span>
+            <span className={robot.stock <= 10 ? 'text-coral font-medium' : 'text-slate'}>
+              {robot.stock <= 10 ? `Only ${robot.stock} left in stock` : `${robot.stock} in stock`}
+            </span>
           </div>
 
           <p className="mt-5 font-display text-3xl font-semibold text-ink">{formatPrice(robot.price, robot.currency)}</p>
@@ -84,7 +86,7 @@ export default function RobotDetail() {
             </button>
             <Link
               to="/cart"
-              className="flex-1 min-w-[140px] rounded-full bg-ink px-6 py-3 text-sm font-medium text-white hover:bg-teal-950 transition-colors text-center"
+              className="flex-1 min-w-[140px] rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white hover:bg-[#E85E3E] transition-colors text-center"
             >
               Buy Now
             </Link>

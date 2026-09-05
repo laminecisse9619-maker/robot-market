@@ -105,7 +105,7 @@ export default function Cart() {
           </div>
           <button
             onClick={() => navigate('/checkout')}
-            className="mt-6 w-full rounded-full bg-ink px-6 py-3 text-sm font-medium text-white hover:bg-teal-950 transition-colors"
+            className="mt-6 w-full rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white hover:bg-[#E85E3E] transition-colors"
           >
             Proceed to Checkout
           </button>

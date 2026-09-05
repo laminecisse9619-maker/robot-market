@@ -163,7 +163,9 @@ export default function Checkout() {
           <button
             onClick={() => (step === 3 ? goToPayment() : setStep((s) => s + 1))}
             disabled={redirecting || (step === 1 && !canContinueShipping)}
-            className="rounded-full bg-ink px-6 py-2.5 text-sm font-medium text-white hover:bg-teal-950 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className={`rounded-full px-6 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+              step === 3 ? 'bg-coral hover:bg-[#E85E3E]' : 'bg-ink hover:bg-teal-950 font-medium'
+            }`}
           >
             {step === 3 ? (redirecting ? 'Redirecting...' : 'Pay now') : 'Continue'}
           </button>
