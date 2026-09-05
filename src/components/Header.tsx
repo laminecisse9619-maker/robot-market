@@ -1,29 +1,34 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Search, Heart, ShoppingCart, Menu, X, Bot, User, LogOut, ChevronDown, MapPin } from 'lucide-react'
+import { Search, Heart, ShoppingCart, Menu, X, Bot, User, LogOut, ChevronDown, MapPin, Globe } from 'lucide-react'
 import { useCart } from '../contexts/CartContext'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { categories } from '../data/categories'
+import { languages } from '../i18n/translations'
 
-const quickLinks = [
-  { to: '/robots', label: 'All Robots' },
+const quickLinkKeys = [
+  { to: '/robots', key: 'nav.allRobots' },
   { to: '/robots?category=humanoid', label: 'Humanoid' },
   { to: '/robots?category=industrial', label: 'Industrial' },
   { to: '/robots?category=cleaning', label: 'Cleaning' },
   { to: '/robots?category=agricultural', label: 'Agricultural' },
-  { to: '/sellers', label: 'Sellers' },
-  { to: '/robots?deals=1', label: 'Flash Deals' },
+  { to: '/sellers', key: 'nav.sellers' },
+  { to: '/robots?deals=1', key: 'nav.flashDeals' },
 ]
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [categoryOpen, setCategoryOpen] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
   const [category, setCategory] = useState('all')
   const [query, setQuery] = useState('')
   const { totalItems } = useCart()
   const { user, signOut } = useAuth()
+  const { language, setLanguage, t } = useLanguage()
   const navigate = useNavigate()
+  const currentLang = languages.find((l) => l.code === language)!
 
   const handleLogout = async () => {
     await signOut()
@@ -54,7 +59,7 @@ export default function Header() {
 
             <div className="hidden lg:flex items-center gap-1 text-white/70 text-xs pl-2 pr-3 border-r border-white/10 mr-1 shrink-0">
               <MapPin size={14} />
-              <span className="leading-tight">Ship to<br /><span className="font-medium text-white">Worldwide</span></span>
+              <span className="leading-tight">{t('nav.shipTo')}<br /><span className="font-medium text-white">{t('nav.worldwide')}</span></span>
             </div>
 
             {/* Big search bar with category dropdown, Amazon-style */}
@@ -75,7 +80,7 @@ export default function Header() {
                       onMouseDown={() => { setCategory('all'); setCategoryOpen(false) }}
                       className="w-full text-left px-3 py-2 text-xs text-ink hover:bg-mist"
                     >
-                      All categories
+                      {t('nav.allCategories')}
                     </button>
                     {categories.map((c) => (
                       <button
@@ -92,7 +97,7 @@ export default function Header() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search for robots, brands, sellers..."
+                placeholder={t('nav.searchPlaceholder')}
                 className="flex-1 min-w-0 px-3 text-sm outline-none text-ink"
               />
               <button type="submit" aria-label="Search" className="shrink-0 flex items-center justify-center w-12 bg-teal-500 hover:bg-teal-400 transition-colors">
@@ -101,6 +106,32 @@ export default function Header() {
             </form>
 
             <div className="flex items-center gap-1 ml-auto md:ml-0">
+              <div className="relative hidden md:block">
+                <button
+                  type="button"
+                  onClick={() => setLangOpen((v) => !v)}
+                  onBlur={() => setTimeout(() => setLangOpen(false), 150)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors text-xs"
+                  aria-label="Change language"
+                >
+                  <Globe size={17} />
+                  <span className="uppercase">{currentLang.code}</span>
+                  <ChevronDown size={12} />
+                </button>
+                {langOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-line bg-white shadow-xl py-1 z-50">
+                    {languages.map((l) => (
+                      <button
+                        key={l.code}
+                        onMouseDown={() => { setLanguage(l.code); setLangOpen(false) }}
+                        className={`w-full text-left px-3 py-2 text-xs hover:bg-mist ${l.code === language ? 'text-teal-700 font-medium' : 'text-ink'}`}
+                      >
+                        {l.nativeLabel}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               {isSupabaseConfigured && (
                 user ? (
                   <button
@@ -108,12 +139,12 @@ export default function Header() {
                     className="hidden md:flex flex-col items-start px-2 py-1 text-white/90 hover:text-white text-xs leading-tight"
                   >
                     <span className="text-white/60">Hello, {user.email?.split('@')[0]}</span>
-                    <span className="font-medium flex items-center gap-1">Sign out <LogOut size={11} /></span>
+                    <span className="font-medium flex items-center gap-1">{t('nav.signOut')} <LogOut size={11} /></span>
                   </button>
                 ) : (
                   <Link to="/login" className="hidden md:flex flex-col items-start px-2 py-1 text-white/90 hover:text-white text-xs leading-tight">
-                    <span className="text-white/60">Hello, sign in</span>
-                    <span className="font-medium flex items-center gap-1">Account <User size={11} /></span>
+                    <span className="text-white/60">{t('nav.helloSignIn')}</span>
+                    <span className="font-medium flex items-center gap-1">{t('nav.account')} <User size={11} /></span>
                   </Link>
                 )
               )}
@@ -140,17 +171,17 @@ export default function Header() {
       <div className="hidden lg:block bg-teal-900">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
           <nav className="flex items-center gap-5 h-10 overflow-x-auto no-scrollbar">
-            {quickLinks.map((link) => (
+            {quickLinkKeys.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
                 className="shrink-0 text-xs font-medium text-white/85 hover:text-white transition-colors"
               >
-                {link.label}
+                {link.key ? t(link.key) : link.label}
               </NavLink>
             ))}
             <Link to="/sell" className="ml-auto shrink-0 rounded-full bg-teal-500 px-4 py-1.5 text-xs font-semibold text-ink hover:bg-teal-400 transition-colors">
-              Sell Your Robot
+              {t('nav.sell')}
             </Link>
           </nav>
         </div>
@@ -163,23 +194,36 @@ export default function Header() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search robots..."
+              placeholder={t('nav.searchPlaceholder')}
               className="w-full bg-transparent text-sm outline-none placeholder:text-slate"
             />
           </form>
+          <div className="flex flex-wrap gap-1.5">
+            {languages.map((l) => (
+              <button
+                key={l.code}
+                onClick={() => setLanguage(l.code)}
+                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                  l.code === language ? 'border-teal-600 bg-mist text-teal-800 font-medium' : 'border-line text-slate'
+                }`}
+              >
+                {l.nativeLabel}
+              </button>
+            ))}
+          </div>
           <nav className="flex flex-col gap-1">
-            {quickLinks.map((link) => (
+            {quickLinkKeys.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={() => setMenuOpen(false)}
                 className="px-3 py-2 rounded-lg text-sm font-medium text-slate hover:bg-mist"
               >
-                {link.label}
+                {link.key ? t(link.key) : link.label}
               </Link>
             ))}
             <Link to="/sell" onClick={() => setMenuOpen(false)} className="px-3 py-2 text-sm font-medium text-teal-700">
-              Sell a Robot
+              {t('nav.sell')}
             </Link>
             <Link to="/cart" onClick={() => setMenuOpen(false)} className="px-3 py-2 text-sm font-medium text-slate">
               Cart {totalItems > 0 && `(${totalItems})`}
@@ -190,11 +234,11 @@ export default function Header() {
                   onClick={() => { setMenuOpen(false); handleLogout() }}
                   className="px-3 py-2 text-left text-sm font-medium text-slate"
                 >
-                  Log out
+                  {t('nav.signOut')}
                 </button>
               ) : (
                 <Link to="/login" onClick={() => setMenuOpen(false)} className="px-3 py-2 text-sm font-medium text-slate">
-                  Log in
+                  {t('nav.account')}
                 </Link>
               )
             )}

@@ -66,6 +66,7 @@ Ce projet utilise les **Vercel Functions** (dossier `/api`) pour exécuter du co
 - Comparateur de robots (jusqu'à 4 robots, tableau de specs)
 - Messagerie acheteur ↔ vendeur (simulée, réponses automatiques)
 - Panier + parcours de paiement en 3 étapes (adresse, livraison, paiement réel via Stripe Checkout)
+- Header et page d'accueil traduits en 6 langues (Anglais, Français, Espagnol, Allemand, Arabe, Chinois), avec choix de langue mémorisé et sens de lecture RTL automatique pour l'arabe
 
 ## Ce qui reste à connecter à une vraie base de données
 - Table `robots` réelle pour que les vendeurs ajoutent leurs propres produits
@@ -73,3 +74,4 @@ Ce projet utilise les **Vercel Functions** (dossier `/api`) pour exécuter du co
 - Table `messages` réelle (actuellement en mémoire, perdue au rechargement)
 - Vérification d'identité/documents vendeur avant publication
 - Reversement automatique aux vendeurs (Stripe Connect) — pour l'instant Stripe encaisse sur ton compte uniquement
+- Traduction complète des pages restantes (Robots, fiche produit, panier, dashboard...) — le système `src/i18n/translations.ts` + `useLanguage()` est prêt, il suffit d'y ajouter des clés page par page

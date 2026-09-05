@@ -4,6 +4,7 @@ import { Zap } from 'lucide-react'
 import type { Robot } from '../types'
 import { sellers } from '../data/sellers'
 import { formatPrice } from '../utils/format'
+import { useLanguage } from '../contexts/LanguageContext'
 
 function useCountdown() {
   const [remaining, setRemaining] = useState(() => msUntilMidnight())
@@ -30,6 +31,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
 
 export default function FlashDeals({ robots }: { robots: Robot[] }) {
   const { h, m, s } = useCountdown()
+  const { t } = useLanguage()
 
   return (
     <section className="mx-auto max-w-7xl px-5 lg:px-8 py-14">
@@ -38,10 +40,10 @@ export default function FlashDeals({ robots }: { robots: Robot[] }) {
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-coral/10 text-coral">
             <Zap size={16} className="fill-coral" />
           </span>
-          <h2 className="font-display text-2xl font-semibold text-ink">Flash deals</h2>
+          <h2 className="font-display text-2xl font-semibold text-ink">{t('home.deals')}</h2>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-slate">
-          Ends in
+          {t('home.dealsEnds')}
           {[h, m, s].map((v, i) => (
             <span key={i} className="rounded-md bg-ink px-2 py-1 font-display font-semibold text-white tabular-nums">
               {pad(v)}
