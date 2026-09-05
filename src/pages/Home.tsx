@@ -4,6 +4,9 @@ import { Search, ArrowUpRight, Bot, Cpu, Factory, House, Sparkles, Shield, Sprou
 import { categories } from '../data/categories'
 import { robots } from '../data/robots'
 import RobotCard from '../components/RobotCard'
+import CategoryStrip from '../components/CategoryStrip'
+import BannerCarousel from '../components/BannerCarousel'
+import FlashDeals from '../components/FlashDeals'
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   Bot, Cpu, Factory, House, Sparkles, Shield, Sprout, HeartPulse, GraduationCap, Truck, Plane, Cog,
@@ -21,9 +24,11 @@ export default function Home() {
   }
 
   const featured = robots.slice(0, 8)
+  const dealsRobots = robots.slice(2, 12)
 
   return (
     <div>
+      <CategoryStrip />
       {/* Hero */}
       <section className="relative overflow-hidden bg-ink">
         <div
@@ -88,6 +93,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <BannerCarousel />
+
+      <FlashDeals robots={dealsRobots} />
 
       {/* Categories */}
       <section className="mx-auto max-w-7xl px-5 lg:px-8 py-16">
