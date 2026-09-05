@@ -174,19 +174,19 @@ export default function Header() {
       </div>
 
       {/* Secondary nav: quick category links */}
-      <div className="hidden lg:block bg-teal-900">
+      <div className="hidden lg:block bg-coral">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
           <nav className="flex items-center gap-5 h-10 overflow-x-auto no-scrollbar">
             {quickLinkKeys.map((link) => (
               <NavLink
                 key={link.to}
                 to={link.to}
-                className="shrink-0 text-xs font-medium text-white/85 hover:text-white transition-colors"
+                className="shrink-0 text-xs font-medium text-white/90 hover:text-white transition-colors"
               >
                 {link.key ? t(link.key) : link.label}
               </NavLink>
             ))}
-            <Link to="/sell" className="ml-auto shrink-0 rounded-full bg-teal-500 px-4 py-1.5 text-xs font-semibold text-ink hover:bg-teal-400 transition-colors">
+            <Link to="/sell" className="ml-auto shrink-0 rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-coral hover:bg-teal-50 transition-colors">
               {t('nav.sell')}
             </Link>
           </nav>
