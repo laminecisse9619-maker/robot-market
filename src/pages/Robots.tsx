@@ -13,7 +13,7 @@ export default function Robots() {
   const activeCategory = searchParams.get('category') ?? ''
 
   const [sort, setSort] = useState<SortKey>('relevance')
-  const [maxPrice, setMaxPrice] = useState<number>(50000)
+  const [maxPrice, setMaxPrice] = useState<number>(200000)
   const [condition, setCondition] = useState<'all' | 'new' | 'used'>('all')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -113,16 +113,19 @@ export default function Robots() {
             </div>
 
             <div>
-              <h3 className="text-sm font-semibold text-ink mb-3">Max price: ${maxPrice.toLocaleString()}</h3>
+              <h3 className="text-sm font-semibold text-ink mb-3">
+                Max price: {maxPrice >= 200000 ? 'No limit' : `$${maxPrice.toLocaleString()}`}
+              </h3>
               <input
                 type="range"
-                min={100}
-                max={50000}
-                step={100}
+                min={500}
+                max={200000}
+                step={500}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
                 className="w-full accent-teal-600"
               />
+              <p className="mt-1.5 text-[11px] text-slate">Les robots "Prix sur devis" restent toujours visibles.</p>
             </div>
 
             <div>

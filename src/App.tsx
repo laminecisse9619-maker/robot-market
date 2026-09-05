@@ -18,6 +18,7 @@ import Compare from './pages/Compare'
 import Messages from './pages/Messages'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import Admin from './pages/Admin'
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
         </Routes>
       </main>
       <Footer />

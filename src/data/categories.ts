@@ -1,16 +1,10 @@
 import type { Category } from '../types'
 
+// Catalogue recentré sur 4 grandes familles de robots B2B réels (40 modèles,
+// 10 par catégorie) — voir src/data/robots.ts pour le détail.
 export const categories: Category[] = [
-  { id: 'c1', name: 'Humanoid Robots', slug: 'humanoid', icon: 'Bot', productCount: 34 },
-  { id: 'c2', name: 'AI Robots', slug: 'ai', icon: 'Cpu', productCount: 51 },
-  { id: 'c3', name: 'Industrial Robots', slug: 'industrial', icon: 'Factory', productCount: 87 },
-  { id: 'c4', name: 'Home Robots', slug: 'home', icon: 'House', productCount: 62 },
-  { id: 'c5', name: 'Cleaning Robots', slug: 'cleaning', icon: 'Sparkles', productCount: 45 },
-  { id: 'c6', name: 'Security Robots', slug: 'security', icon: 'Shield', productCount: 19 },
-  { id: 'c7', name: 'Agricultural Robots', slug: 'agricultural', icon: 'Sprout', productCount: 28 },
-  { id: 'c8', name: 'Medical Robots', slug: 'medical', icon: 'HeartPulse', productCount: 14 },
-  { id: 'c9', name: 'Educational Robots', slug: 'educational', icon: 'GraduationCap', productCount: 22 },
-  { id: 'c10', name: 'Delivery Robots', slug: 'delivery', icon: 'Truck', productCount: 17 },
-  { id: 'c11', name: 'Drones & Autonomous', slug: 'drones', icon: 'Plane', productCount: 39 },
-  { id: 'c12', name: 'Parts & Accessories', slug: 'parts', icon: 'Cog', productCount: 96 },
+  { id: 'c1', name: 'Cobots industriels', slug: 'cobots', icon: 'Bot', productCount: 10 },
+  { id: 'c2', name: 'AMR & robots logistiques', slug: 'amr', icon: 'Truck', productCount: 10 },
+  { id: 'c3', name: 'Robots quadrupèdes', slug: 'quadrupeds', icon: 'PawPrint', productCount: 10 },
+  { id: 'c4', name: 'Robots éducatifs', slug: 'educational', icon: 'GraduationCap', productCount: 10 },
 ]

@@ -23,11 +23,11 @@ const banners: Banner[] = [
   },
   {
     id: 'b2',
-    eyebrow: 'Flash deals',
-    title: 'Up to 30% off industrial arms this week',
-    subtitle: 'Limited-time pricing from verified manufacturers.',
-    cta: 'Shop deals',
-    to: '/robots?deals=1',
+    eyebrow: 'Demande de devis',
+    title: 'Recevez un devis sous 24h pour vos cobots et AMR',
+    subtitle: 'Un formulaire, une réponse directe de notre équipe — sans engagement.',
+    cta: 'Voir le catalogue',
+    to: '/robots',
     gradient: 'linear-gradient(120deg, #0B2F2C, var(--color-teal-700))',
   },
   {

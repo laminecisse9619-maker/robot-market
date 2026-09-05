@@ -3,7 +3,7 @@ import { X, GitCompare } from 'lucide-react'
 import { useCompare } from '../contexts/CompareContext'
 import { robots } from '../data/robots'
 import { sellers } from '../data/sellers'
-import { formatPrice } from '../utils/format'
+import { formatPriceOrQuote } from '../utils/format'
 
 export default function Compare() {
   const { ids, toggle, clear } = useCompare()
@@ -52,7 +52,7 @@ export default function Compare() {
                     <Link to={`/robots/${r.slug}`} className="font-display text-sm font-semibold text-ink hover:text-teal-700 line-clamp-2">
                       {r.name}
                     </Link>
-                    <p className="mt-1 font-display text-sm font-semibold text-teal-700">{formatPrice(r.price, r.currency)}</p>
+                    <p className="mt-1 font-display text-sm font-semibold text-teal-700">{formatPriceOrQuote(r.price, r.currency, r.priceOnRequest)}</p>
                   </div>
                 </th>
               ))}

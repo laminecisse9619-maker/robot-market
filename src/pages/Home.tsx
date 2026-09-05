@@ -3,17 +3,17 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Search, ArrowUpRight, Bot, Cpu, Factory, House, Sparkles, Shield, Sprout, HeartPulse, GraduationCap, Truck, Plane, Cog } from 'lucide-react'
 import { categories } from '../data/categories'
 import { robots } from '../data/robots'
+import { CATEGORY_STOCK_IMAGES } from '../data/images'
 import RobotCard from '../components/RobotCard'
 import CategoryStrip from '../components/CategoryStrip'
 import BannerCarousel from '../components/BannerCarousel'
-import FlashDeals from '../components/FlashDeals'
 import { useLanguage } from '../contexts/LanguageContext'
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   Bot, Cpu, Factory, House, Sparkles, Shield, Sprout, HeartPulse, GraduationCap, Truck, Plane, Cog,
 }
 
-const suggestions = ['Humanoid robot', 'Cleaning robot', 'Industrial robot', 'Agricultural robot', 'AI robot']
+const suggestions = ['UR5e', 'MiR250', 'Unitree Go2', 'Boston Dynamics Spot', 'Niryo Ned2']
 
 export default function Home() {
   const [query, setQuery] = useState('')
@@ -26,7 +26,6 @@ export default function Home() {
   }
 
   const featured = robots.slice(0, 8)
-  const dealsRobots = robots.slice(2, 12)
 
   return (
     <div>
@@ -87,18 +86,16 @@ export default function Home() {
 
           <div className="relative hidden lg:block">
             <div className="grid grid-cols-2 gap-4">
-              <img src="https://picsum.photos/seed/hero-a/500/620" alt="" className="rounded-2xl object-cover h-72 w-full translate-y-6" />
-              <img src="https://picsum.photos/seed/hero-b/500/620" alt="" className="rounded-2xl object-cover h-72 w-full" />
-              <img src="https://picsum.photos/seed/hero-c/500/620" alt="" className="rounded-2xl object-cover h-72 w-full" />
-              <img src="https://picsum.photos/seed/hero-d/500/620" alt="" className="rounded-2xl object-cover h-72 w-full translate-y-6" />
+              <img src={CATEGORY_STOCK_IMAGES.cobots[0]} alt="Cobot industriel" className="rounded-2xl object-cover h-72 w-full translate-y-6" />
+              <img src={CATEGORY_STOCK_IMAGES.amr[0]} alt="Robot mobile autonome (AMR)" className="rounded-2xl object-cover h-72 w-full" />
+              <img src={CATEGORY_STOCK_IMAGES.quadrupeds[0]} alt="Robot quadrupède" className="rounded-2xl object-cover h-72 w-full" />
+              <img src={CATEGORY_STOCK_IMAGES.educational[0]} alt="Robot éducatif" className="rounded-2xl object-cover h-72 w-full translate-y-6" />
             </div>
           </div>
         </div>
       </section>
 
       <BannerCarousel />
-
-      <FlashDeals robots={dealsRobots} />
 
       {/* Categories */}
       <section className="mx-auto max-w-7xl px-5 lg:px-8 py-16">

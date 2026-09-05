@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Star, Heart, BadgeCheck, GitCompare } from 'lucide-react'
 import type { Robot } from '../types'
 import { sellers } from '../data/sellers'
-import { formatPrice } from '../utils/format'
+import { formatPriceOrQuote } from '../utils/format'
 import { useCompare } from '../contexts/CompareContext'
 
 export default function RobotCard({ robot }: { robot: Robot }) {
@@ -58,7 +58,9 @@ export default function RobotCard({ robot }: { robot: Robot }) {
         </div>
         <h3 className="font-display text-base font-semibold leading-snug text-ink">{robot.name}</h3>
         <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="font-display text-lg font-semibold text-ink">{formatPrice(robot.price, robot.currency)}</span>
+          <span className="font-display text-lg font-semibold text-ink">
+            {formatPriceOrQuote(robot.price, robot.currency, robot.priceOnRequest)}
+          </span>
           <span className="flex items-center gap-1 text-sm text-slate">
             <Star size={14} className="fill-teal-500 text-teal-500" />
             {robot.rating} <span className="text-slate/70">({robot.reviewCount})</span>

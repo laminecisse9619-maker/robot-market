@@ -68,6 +68,54 @@ Ce projet utilise les **Vercel Functions** (dossier `/api`) pour exécuter du co
 - Panier + parcours de paiement en 3 étapes (adresse, livraison, paiement réel via Stripe Checkout)
 - Header et page d'accueil traduits en 6 langues (Anglais, Français, Espagnol, Allemand, Arabe, Chinois), avec choix de langue mémorisé et sens de lecture RTL automatique pour l'arabe
 
+## Connecter l'envoi d'e-mails (devis + revendication de fiche)
+
+Le bouton **Demander un devis** (fiche produit) et le formulaire **Revendiquer ce profil**
+(affiché sur les fiches non revendiquées) envoient désormais un vrai e-mail via
+[Resend](https://resend.com), plus un enregistrement en base pour l'espace `/admin`.
+
+1. Crée un compte sur **resend.com** (gratuit jusqu'à 3 000 e-mails/mois)
+2. **Domains** → ajoute et vérifie ton domaine d'envoi (ex. `obovia.com`) via les
+   enregistrements DNS demandés
+3. **API Keys** → crée une clé, commençant par `re_...`
+4. Sur Vercel : **Project Settings → Environment Variables**, ajoute :
+   - `RESEND_API_KEY` = ta clé Resend
+   - `QUOTES_FROM_EMAIL` = ex. `ROBOT MARKET <devis@obovia.com>` (doit utiliser le domaine vérifié)
+   - `ADMIN_EMAIL` = l'adresse qui doit recevoir toutes les demandes
+   - `SUPABASE_SERVICE_ROLE_KEY` = **Settings → API → service_role secret** dans Supabase
+     (nécessaire pour que les fonctions `/api` puissent écrire dans les tables même avec RLS actif)
+5. Exécute la mise à jour de `supabase/schema.sql` dans le SQL Editor (crée les tables
+   `quote_requests` et `claim_requests`) — remplace `admin@obovia.com` par ta vraie adresse
+   dans les policies RLS avant de l'exécuter
+6. Redéploie
+
+Une fois configuré :
+- **Demander un devis** envoie un e-mail à `ADMIN_EMAIL` avec le nom du robot, les
+  coordonnées de l'acheteur et un identifiant unique (`DEV-XXXXXXXX`), et enregistre la
+  demande dans `quote_requests`
+- Si un fabricant a **revendiqué et validé** sa fiche (`claimed: true` + `contactEmail`
+  dans `src/data/sellers.ts`), il reçoit une copie de l'e-mail. **Aucun e-mail n'est
+  envoyé à une adresse générique devinée pour un fabricant qui n'a pas rejoint la
+  plateforme** — c'est précisément le rôle du bouton de revendication
+- **Vous êtes le constructeur ? Revendiquez ce profil** envoie une notification à
+  `ADMIN_EMAIL` et enregistre la demande dans `claim_requests`, visible sur `/admin`
+  (nécessite d'être connecté avec le compte dont l'e-mail correspond à la policy RLS)
+- Sans `RESEND_API_KEY`, les deux formulaires afficheront une erreur claire au lieu
+  d'échouer silencieusement
+
+## Catalogue (40 robots réels, 10 par catégorie)
+
+`src/data/robots.ts` contient 40 robots réels (cobots, AMR, quadrupèdes, éducatifs)
+avec leurs vraies spécifications techniques sourcées des fiches constructeur (charge
+utile, portée, poids, IP, prix quand il est public). Les fabricants (`src/data/sellers.ts`)
+sont marqués `isPlaceholder: true` tant qu'ils n'ont pas revendiqué leur fiche : c'est un
+choix assumé — on ne prétend jamais représenter commercialement Universal Robots, FANUC,
+Unitree etc. tant qu'ils n'ont pas confirmé leur identité via le formulaire de revendication.
+
+Les visuels utilisent des photos génériques par catégorie (`src/data/images.ts`, sources
+vérifiées : licence Unsplash + Wikimedia Commons) en attendant que chaque fabricant
+revendique sa fiche et fournisse ses propres visuels officiels.
+
 ## Ce qui reste à connecter à une vraie base de données
 - Table `robots` réelle pour que les vendeurs ajoutent leurs propres produits
 - Table `orders` réelle (webhook Stripe → Supabase) pour un historique de commandes persistant

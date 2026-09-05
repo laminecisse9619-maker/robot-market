@@ -11,10 +11,10 @@ import { languages } from '../i18n/translations'
 
 const quickLinkKeys = [
   { to: '/robots', key: 'nav.allRobots' },
-  { to: '/robots?category=humanoid', label: 'Humanoid' },
-  { to: '/robots?category=industrial', label: 'Industrial' },
-  { to: '/robots?category=cleaning', label: 'Cleaning' },
-  { to: '/robots?category=agricultural', label: 'Agricultural' },
+  { to: '/robots?category=cobots', label: 'Cobots' },
+  { to: '/robots?category=amr', label: 'AMR' },
+  { to: '/robots?category=quadrupeds', label: 'Quadrupèdes' },
+  { to: '/robots?category=educational', label: 'Éducatifs' },
   { to: '/sellers', key: 'nav.sellers' },
   { to: '/robots?deals=1', key: 'nav.flashDeals' },
 ]

@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useParams, Link, Navigate } from 'react-router-dom'
-import { Star, BadgeCheck, Heart, MessageCircle, ShieldCheck, Truck } from 'lucide-react'
+import { Star, BadgeCheck, Heart, MessageCircle, ShieldCheck, Truck, FileText, Building2 } from 'lucide-react'
 import { robots } from '../data/robots'
 import { sellers } from '../data/sellers'
 import { useCart } from '../contexts/CartContext'
-import { formatPrice } from '../utils/format'
+import { formatPriceOrQuote } from '../utils/format'
 import RobotCard from '../components/RobotCard'
+import QuoteRequestModal from '../components/QuoteRequestModal'
+import ClaimListingModal from '../components/ClaimListingModal'
 
 export default function RobotDetail() {
   const { slug } = useParams()
@@ -13,11 +15,14 @@ export default function RobotDetail() {
   const { addItem } = useCart()
   const [activeImage, setActiveImage] = useState(0)
   const [added, setAdded] = useState(false)
+  const [showQuoteModal, setShowQuoteModal] = useState(false)
+  const [showClaimModal, setShowClaimModal] = useState(false)
 
   if (!robot) return <Navigate to="/robots" replace />
 
   const seller = sellers.find((s) => s.id === robot.sellerId)
   const similar = robots.filter((r) => r.categorySlug === robot.categorySlug && r.id !== robot.id).slice(0, 4)
+  const isPlaceholderListing = seller?.isPlaceholder && !seller.claimed
 
   const handleAdd = () => {
     addItem(robot.id)
@@ -32,6 +37,21 @@ export default function RobotDetail() {
         <Link to="/robots" className="hover:text-teal-700">Robots</Link> /
         <span className="text-ink">{robot.name}</span>
       </nav>
+
+      {isPlaceholderListing && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-mist px-4 py-3 text-sm text-slate">
+          <span>
+            Cette fiche présente un produit réel de <strong className="text-ink">{seller?.name}</strong>, non encore
+            revendiquée par le fabricant.
+          </span>
+          <button
+            onClick={() => setShowClaimModal(true)}
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-ink px-3.5 py-1.5 text-xs font-medium text-ink hover:bg-ink hover:text-white transition-colors"
+          >
+            <Building2 size={13} /> Vous êtes le constructeur ? Revendiquez ce profil
+          </button>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-10">
         {/* Gallery */}
@@ -67,29 +87,32 @@ export default function RobotDetail() {
               <Star size={15} className="fill-teal-500 text-teal-500" /> {robot.rating}
             </span>
             <span className="text-slate">{robot.reviewCount} reviews</span>
-            <span className="text-slate">·</span>
-            <span className={robot.stock <= 10 ? 'text-coral font-medium' : 'text-slate'}>
-              {robot.stock <= 10 ? `Only ${robot.stock} left in stock` : `${robot.stock} in stock`}
-            </span>
           </div>
 
-          <p className="mt-5 font-display text-3xl font-semibold text-ink">{formatPrice(robot.price, robot.currency)}</p>
+          <p className="mt-5 font-display text-3xl font-semibold text-ink">
+            {formatPriceOrQuote(robot.price, robot.currency, robot.priceOnRequest)}
+          </p>
+          {robot.priceOnRequest && (
+            <p className="mt-1 text-xs text-slate">Tarif communiqué sur devis en fonction de votre configuration et de votre volume.</p>
+          )}
 
           <p className="mt-4 text-sm leading-relaxed text-slate">{robot.description}</p>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <button
-              onClick={handleAdd}
-              className="flex-1 min-w-[140px] rounded-full bg-teal-600 px-6 py-3 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
+              onClick={() => setShowQuoteModal(true)}
+              className="flex-1 min-w-[180px] flex items-center justify-center gap-2 rounded-full bg-teal-600 px-6 py-3 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
             >
-              {added ? 'Added to cart' : 'Add to Cart'}
+              <FileText size={15} /> Demander un devis
             </button>
-            <Link
-              to="/cart"
-              className="flex-1 min-w-[140px] rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white hover:bg-[#E85E3E] transition-colors text-center"
-            >
-              Buy Now
-            </Link>
+            {!robot.priceOnRequest && (
+              <button
+                onClick={handleAdd}
+                className="flex-1 min-w-[140px] rounded-full border border-line px-6 py-3 text-sm font-medium text-ink hover:bg-mist transition-colors"
+              >
+                {added ? 'Ajouté au panier' : 'Ajouter au panier'}
+              </button>
+            )}
             <button className="flex items-center justify-center gap-2 rounded-full border border-line px-5 py-3 text-sm font-medium text-ink hover:bg-mist transition-colors">
               <Heart size={15} /> Wishlist
             </button>
@@ -105,15 +128,27 @@ export default function RobotDetail() {
                 <div className="flex items-center gap-1.5">
                   <p className="text-sm font-medium text-ink">{seller.name}</p>
                   {seller.verified && <BadgeCheck size={14} className="text-teal-600" />}
+                  {isPlaceholderListing && (
+                    <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-medium text-slate">Fiche non revendiquée</span>
+                  )}
                 </div>
-                <p className="text-xs text-slate">{seller.country} · {seller.salesCount} sales</p>
+                <p className="text-xs text-slate">{seller.country}</p>
               </div>
-              <Link
-                to={`/messages?seller=${seller.slug}`}
-                className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-mist"
-              >
-                <MessageCircle size={13} /> Contact
-              </Link>
+              {isPlaceholderListing ? (
+                <button
+                  onClick={() => setShowClaimModal(true)}
+                  className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-mist"
+                >
+                  <Building2 size={13} /> Revendiquer
+                </button>
+              ) : (
+                <Link
+                  to={`/messages?seller=${seller.slug}`}
+                  className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-mist"
+                >
+                  <MessageCircle size={13} /> Contact
+                </Link>
+              )}
             </div>
           )}
 
@@ -138,16 +173,18 @@ export default function RobotDetail() {
       </section>
 
       {/* Features */}
-      <section className="mt-10">
-        <h2 className="font-display text-xl font-semibold text-ink mb-5">Features</h2>
-        <ul className="grid sm:grid-cols-2 gap-3">
-          {robot.features.map((f) => (
-            <li key={f} className="flex items-center gap-2 text-sm text-ink">
-              <span className="h-1.5 w-1.5 rounded-full bg-teal-500 shrink-0" /> {f}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {robot.features.length > 0 && (
+        <section className="mt-10">
+          <h2 className="font-display text-xl font-semibold text-ink mb-5">Features</h2>
+          <ul className="grid sm:grid-cols-2 gap-3">
+            {robot.features.map((f) => (
+              <li key={f} className="flex items-center gap-2 text-sm text-ink">
+                <span className="h-1.5 w-1.5 rounded-full bg-teal-500 shrink-0" /> {f}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Similar robots */}
       {similar.length > 0 && (
@@ -159,6 +196,11 @@ export default function RobotDetail() {
             ))}
           </div>
         </section>
+      )}
+
+      {showQuoteModal && <QuoteRequestModal robot={robot} onClose={() => setShowQuoteModal(false)} />}
+      {showClaimModal && seller && (
+        <ClaimListingModal robot={robot} seller={seller} onClose={() => setShowClaimModal(false)} />
       )}
     </div>
   )
