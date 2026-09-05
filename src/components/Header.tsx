@@ -4,6 +4,7 @@ import { Search, Heart, ShoppingCart, Menu, X, Bot, User, LogOut, ChevronDown, M
 import { useCart } from '../contexts/CartContext'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useDelivery } from '../contexts/DeliveryContext'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { categories } from '../data/categories'
 import { languages } from '../i18n/translations'
@@ -27,6 +28,7 @@ export default function Header() {
   const { totalItems } = useCart()
   const { user, signOut } = useAuth()
   const { language, setLanguage, t } = useLanguage()
+  const { location } = useDelivery()
   const navigate = useNavigate()
   const currentLang = languages.find((l) => l.code === language)!
 
@@ -58,8 +60,12 @@ export default function Header() {
             </Link>
 
             <div className="hidden lg:flex items-center gap-1 text-white/70 text-xs pl-2 pr-3 border-r border-white/10 mr-1 shrink-0">
-              <MapPin size={14} />
-              <span className="leading-tight">{t('nav.shipTo')}<br /><span className="font-medium text-white">{t('nav.worldwide')}</span></span>
+              {location ? (
+                <span className="text-base leading-none" aria-hidden>{location.flag}</span>
+              ) : (
+                <MapPin size={14} />
+              )}
+              <span className="leading-tight">{t('nav.shipTo')}<br /><span className="font-medium text-white">{location?.country ?? t('nav.worldwide')}</span></span>
             </div>
 
             {/* Big search bar with category dropdown, Amazon-style */}

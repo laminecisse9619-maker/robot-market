@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import PromoBar from './components/PromoBar'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import CompareBar from './components/CompareBar'
@@ -21,6 +22,7 @@ import Signup from './pages/Signup'
 function App() {
   return (
     <div className="flex min-h-screen flex-col">
+      <PromoBar />
       <Header />
       <main className="flex-1">
         <Routes>
